@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CG Transformation Playground | Interactive 2D & 3D</title>
+    <!-- Three.js CDN for 3D rendering -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- ==================== HEADER ==================== -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <span class="logo-icon">◈</span>
+                <div class="logo-text">
+                    <h1>Computer Graphics</h1>
+                    <p>Transformation Playground</p>
+                </div>
+            </div>
+            <div class="header-info">
+                <span class="badge">LLT1</span>
+                <span class="course-code">21CSE255T</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- ==================== NAVIGATION TABS ==================== -->
+    <nav class="mode-tabs">
+        <div class="tabs-container">
+            <button id="btn-2d" class="tab-btn active">
+                <span class="tab-icon">2D</span>
+                <span class="tab-label">2D Transformations</span>
+            </button>
+            <button id="btn-3d" class="tab-btn">
+                <span class="tab-icon">3D</span>
+                <span class="tab-label">3D Transformations</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- ==================== 2D TRANSFORMATION PANEL ==================== -->
+    <section id="panel-2d" class="panel active">
+        <div class="workspace">
+            <!-- Canvas Area -->
+            <div class="canvas-area">
+                <div class="canvas-header">
+                    <h3>Canvas View</h3>
+                    <div class="canvas-badges">
+                        <span class="badge-shape original">
+                            <span class="dot"></span> Original Shape
+                        </span>
+                        <span class="badge-shape transformed">
+                            <span class="dot"></span> Transformed Shape
+                        </span>
+                    </div>
+                </div>
+                <canvas id="canvas2d" width="700" height="500"></canvas>
+                <div class="canvas-footer">
+                    <span class="coord-display">Origin: Center (350, 250)</span>
+                </div>
+            </div>
+
+            <!-- Control Panel -->
+            <aside class="controls">
+                <!-- Shape Selection -->
+                <div class="control-group">
+                    <div class="group-header">
+                        <h3>Shape Selection</h3>
+                        <span class="group-icon">◇</span>
+                    </div>
+                    <select id="shape-select" class="styled-select">
+                        <option value="triangle">Triangle</option>
+                        <option value="rectangle">Rectangle</option>
+                        <option value="polygon">Custom Polygon (Draw)</option>
+                    </select>
+                    <div class="polygon-btns hidden">
+                        <button id="btn-draw-polygon" class="btn-secondary">✓ Finish Polygon</button>
+                        <button id="btn-clear-polygon" class="btn-secondary">✕ Clear Polygon</button>
+                    </div>
+                </div>
+
+                <!-- Translation Controls -->
+                <div class="control-group">
+                    <div class="group-header">
+                        <h3>Translation</h3>
+                        <span class="matrix-eq">T = [Tx Ty]</span>
+                    </div>
+                    <div class="slider-group">
+                        <label>Tx (X-Axis): <span id="val-tx" class="value">0</span></label>
+                        <input type="range" id="tx" min="-300" max="300" value="0" class="styled-slider">
+                    </div>
+                    <div class="slider-group">
+                        <label>Ty (Y-Axis): <span id="val-ty" class="value">0</span></label>
+                        <input type="range" id="ty" min="-300" max="300" value="0" class="styled-slider">
+                    </div>
+                </div>
+
+                <!-- Rotation Controls -->
+                <div class="control-group">
+                    <div class="group-header">
+                        <h3>Rotation</h3>
+                        <span class="matrix-eq">R(θ)</span>
+                    </div>
+                    <div class="slider-group">
+                        <label>Angle (θ): <span id="val-angle" class="value">0</span>°</label>
+                        <input type="range" id="angle" min="-360" max="360" value="0" class="styled-slider">
+                    </div>
+                    <div class="slider-group">
+                        <label>Pivot X: <span id="val-px" class="value">350</span></label>
+                        <input type="range" id="px" min="0" max="700" value="350" class="styled-slider">
+                    </div>
+                    <div class="slider-group">
+                        <label>Pivot Y: <span id="val-py" class="value">250</span></label>
+                        <input type="range" id="py" min="0" max="500" value="250" class="styled-slider">
+                    </div>
+                </div>
+
+                <!-- Scaling Controls -->
+                <div class="control-group">
+                    <div class="group-header">
+                        <h3>Scaling</h3>
+                        <span class="matrix-eq">S = [Sx Sy]</span>
+                    </div>
+                    <div class="slider-group">
+                        <label>Sx (X-Scale): <span id="val-sx" class="value">1.0</span></label>
+                        <input type="range" id="sx" min="0.1" max="3" step="0.1" value="1" class="styled-slider">
+                    </div>
+                    <div class="slider-group">
+                        <label>Sy (Y-Scale): <span id="val-sy" class="value">1.0</span></label>
+                        <input type="range" id="sy" min="0.1" max="3" step="0.1" value="1" class="styled-slider">
+                    </div>
+                </div>
+
+                <!-- Reflection Controls -->
+                <div class="control-group">
+                    <div class="group-header">
+                        <h3>Reflection</h3>
+                        <span class="matrix-eq">Ref</span>
+                    </div>
+                    <div class="toggle-group">
+                        <button id="reflect-x" class="toggle-btn">Reflect X-Axis</button>
+                        <button id="reflect-y" class="toggle-btn">Reflect Y-Axis</button>
+                    </div>
+                    <div class="slider-group">
+                        <label>Custom Line Angle: <span id="val-refl-angle" class="value">0</span>°</label>
+                        <input type="range" id="refl-angle" min="0" max="180" value="0" class="styled-slider">
+                    </div>
+                </div>
+
+                <!-- Shear Controls -->
+                <div class="control-group">
+                    <div class="group-header">
+                        <h3>Shear</h3>
+                        <span class="matrix-eq">Sh</span>
+                    </div>
+                    <div class="slider-group">
+                        <label>Shx (X-Shear): <span id="val-shx" class="value">0</span></label>
+                        <input type="range" id="shx" min="-2" max="2" step="0.1" value="0" class="styled-slider">
+                    </div>
+                    <div class="slider-group">
+                        <label>Shy (Y-Shear): <span id="val-shy" class="value">0</span></label>
+                        <input type="range" id="shy" min="-2" max="2" step="0.1" value="0" class="styled-slider">
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="control-group actions">
+                    <button id="btn-animate-2d" class="btn-action animate">
+                        <span class="btn-icon">▶</span> Animate Rotation
+                    </button>
+                    <div class="btn-row">
+                        <button id="btn-reset-2d" class="btn-action reset">↺ Reset</button>
+                        <button id="btn-export-2d" class="btn-action export">↓ Export</button>
+                    </div>
+                </div>
+            </aside>
+        </div>
+
+        <!-- Matrix Display Panel -->
+        <div class="matrix-panel">
+            <div class="matrix-header">
+                <h3>Transformation Matrix</h3>
+                <span class="matrix-type">3×3 Homogeneous Matrix</span>
+            </div>
+            <div id="matrix-2d" class="matrix-display"></div>
+            <div class="matrix-explanation">
+                <p>Formula: <code>P' = M × P</code> where M is the composite transformation matrix</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== 3D TRANSFORMATION PANEL ==================== -->
+    <section id="panel-3d" class="panel">
+        <div class="workspace">
+            <!-- 3D Canvas Area -->
+            <div class="canvas-area">
+                <div class="canvas-header">
+                    <h3>3D View</h3>
+                    <div class="canvas-badges">
+                        <span class="badge-shape">
+                            <span class="dot cube"></span> Wireframe
+                        </span>
+                    </div>
+                </div>
+                <div id="canvas3d-container">
+                    <!-- Three.js canvas will be appended here -->
+                </div>
+                <div class="canvas-footer-3d">
+                    <span>Use mouse to orbit • Scroll to zoom</span>
+                </div>
+            </div>
+
+            <!-- 3D Control Panel -->
+            <aside class="controls">
+                <!-- Object Selection -->
+                <div class="control-group">
+                    <div class="group-header">
+                        <h3>Object Selection</h3>
+                        <span class="group-icon">◆</span>
+                    </div>
+                    <select id="object3d-select" class="styled-select">
+                        <option value="cube">Wireframe Cube</option>
+                        <option value="pyramid">Wireframe Pyramid</option>
+                    </select>
+                </div>
+
+                <!-- 3D Translation -->
+                <div class="control-group">
+                    <div class="group-header">
+                        <h3>3D Translation</h3>
+                        <span class="matrix-eq">T = [Tx Ty Tz]</span>
+                    </div>
+                    <div class="slider-group">
+                        <label>Tx: <span id="val-3d-tx" class="value">0</span></label>
+                        <input type="range" id="3d-tx" min="-5" max="5" step="0.1" value="0" class="styled-slider">
+                    </div>
+                    <div class="slider-group">
+                        <label>Ty: <span id="val-3d-ty" class="value">0</span></label>
+                        <input type="range" id="3d-ty" min="-5" max="5" step="0.1" value="0" class="styled-slider">
+                    </div>
+                    <div class="slider-group">
+                        <label>Tz: <span id="val-3d-tz" class="value">0</span></label>
+                        <input type="range" id="3d-tz" min="-5" max="5" step="0.1" value="0" class="styled-slider">
+                    </div>
+                </div>
+
+                <!-- 3D Rotation -->
+                <div class="control-group">
+                    <div class="group-header">
+                        <h3>3D Rotation</h3>
+                        <span class="matrix-eq">Rx Ry Rz</span>
+                    </div>
+                    <div class="slider-group">
+                        <label>Rx (X-Axis): <span id="val-3d-rx" class="value">0</span>°</label>
+                        <input type="range" id="3d-rx" min="-180" max="180" value="0" class="styled-slider">
+                    </div>
+                    <div class="slider-group">
+                        <label>Ry (Y-Axis): <span id="val-3d-ry" class="value">0</span>°</label>
+                        <input type="range" id="3d-ry" min="-180" max="180" value="0" class="styled-slider">
+                    </div>
+                    <div class="slider-group">
+                        <label>Rz (Z-Axis): <span id="val-3d-rz" class="value">0</span>°</label>
+                        <input type="range" id="3d-rz" min="-180" max="180" value="0" class="styled-slider">
+                    </div>
+                </div>
+
+                <!-- 3D Scaling -->
+                <div class="control-group">
+                    <div class="group-header">
+                        <h3>3D Scaling</h3>
+                        <span class="matrix-eq">S = [Sx Sy Sz]</span>
+                    </div>
+                    <div class="slider-group">
+                        <label>Sx: <span id="val-3d-sx" class="value">1.0</span></label>
+                        <input type="range" id="3d-sx" min="0.1" max="3" step="0.1" value="1" class="styled-slider">
+                    </div>
+                    <div class="slider-group">
+                        <label>Sy: <span id="val-3d-sy" class="value">1.0</span></label>
+                        <input type="range" id="3d-sy" min="0.1" max="3" step="0.1" value="1" class="styled-slider">
+                    </div>
+                    <div class="slider-group">
+                        <label>Sz: <span id="val-3d-sz" class="value">1.0</span></label>
+                        <input type="range" id="3d-sz" min="0.1" max="3" step="0.1" value="1" class="styled-slider">
+                    </div>
+                </div>
+
+                <!-- Projection Mode -->
+                <div class="control-group">
+                    <div class="group-header">
+                        <h3>Projection</h3>
+                        <span class="group-icon">◎</span>
+                    </div>
+                    <select id="projection-select" class="styled-select">
+                        <option value="perspective">Perspective Projection</option>
+                        <option value="orthographic">Orthographic (Parallel)</option>
+                    </select>
+                </div>
+
+                <!-- Display Options -->
+                <div class="control-group">
+                    <div class="group-header">
+                        <h3>Display Options</h3>
+                        <span class="group-icon">◉</span>
+                    </div>
+                    <div class="checkbox-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="show-axes" checked>
+                            <span class="checkbox-custom"></span>
+                            Show XYZ Axes
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="show-labels" checked>
+                            <span class="checkbox-custom"></span>
+                            Show Axis Labels
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="show-grid" checked>
+                            <span class="checkbox-custom"></span>
+                            Show Grid
+                        </label>
+                    </div>
+                </div>
+
+                <!-- 3D Action Buttons -->
+                <div class="control-group actions">
+                    <button id="btn-animate-3d" class="btn-action animate">
+                        <span class="btn-icon">↻</span> Auto Rotate
+                    </button>
+                    <button id="btn-reset-3d" class="btn-action reset">↺ Reset All</button>
+                </div>
+            </aside>
+        </div>
+
+        <!-- 3D Matrix Display -->
+        <div class="matrix-panel">
+            <div class="matrix-header">
+                <h3>3D Transformation Matrix</h3>
+                <span class="matrix-type">4×4 Homogeneous Matrix</span>
+            </div>
+            <div id="matrix-3d" class="matrix-display"></div>
+            <div class="matrix-explanation">
+                <p>Formula: <code>P' = T × R × S × P</code> combined transformation matrix</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== FOOTER ==================== -->
+    <footer class="footer">
+        <div class="footer-content">
+            <p class="course-info">21CSE255T - Computer Graphics and Animation | LLT1</p>
+            <p class="credits">Built with HTML5 Canvas & Three.js</p>
+        </div>
+    </footer>
+
+    <!-- ==================== SCRIPTS ==================== -->
+    <script src="matrix-display.js"></script>
+    <script src="engine2d.js"></script>
+    <script src="engine3d.js"></script>
+    <script src="main.js"></script>
+</body>
+</html>
